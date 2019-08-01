@@ -17,7 +17,7 @@ rcsp_scenario   = current_folder + '\\openvibe_scenarios\\16chan_train_RCSP.xml'
 online_scenario = current_folder + '\\openvibe_scenarios\\replay_online.xml'
 
 # Put the path to the log file below
-ov_log_folder   = 'C:\\Users\\wap\\AppData\\Roaming\\openvibe-2.1.0\\log\\openvibe-designer.log'   
+ov_log           = 'user path \\AppData\\Roaming\\openvibe-2.1.0\\log\\openvibe-designer.log'   
 
 log_folder       = current_folder + '\\txt_logs\\'
 files_folder     = current_folder + '\\ov_files'
@@ -32,45 +32,45 @@ df_sessions     = pd.read_excel(sessions_to_run)
 inds_trn_all    = df_sessions['type'] == 'trn'
 inds_bartrn_all = df_sessions['type'] == 'bartrn'
 
+Thik_coeff = [1e-3,1e-2,1e-1,1]
+variants = len(Thik_coeff)
+
 # =============================================================================
-# 1. Get accuracies by running CSP/RCSP then Classifier scenarios
+# 1. Get accuracies by running CSP/RCSP then Classifier scenarios on every .ov file
 # =============================================================================
 acc_list = []
 count_ind = 0
-count_trn = 1
 start_time = time()
+      
+print("Now running CSPs and Classifiers")
 for ind in range(len(df_sessions)):
-    if inds_trn_all[ind]:
-        file_dict = {}
-        ov_file   = df_sessions['ov_file'][count_ind].split('_')
-        stem      = ov_file[0] + '_' + ov_file[1] + '_bartrn'
-        index_bar = [i for i, elem in enumerate(df_sessions['ov_file']) if stem in elem]
+    file_dict = {}
+    ov_file   = df_sessions['ov_file'][count_ind].split('_')
+    
+    file_dict['trn']     = df_sessions['ov_file'][count_ind]
+    file_dict['path']    = df_sessions['path_data'][count_ind]     
         
-        file_dict['trn']     = df_sessions['ov_file'][count_ind]
-        file_dict['path']    = df_sessions['path_data'][count_ind]
-        file_dict['bar_trn'] = df_sessions['ov_file'][index_bar[0]]         
-            
-        print('file {}/{} : {}'.format(count_trn,sum(inds_trn_all), df_sessions['ov_file'][count_ind]))
-        trn_acc = run_env.run_environment.run_csp_classifier(count_trn, files_folder, csp_class_folder, file_dict, ov_log_folder, 
-                                           log_folder, results_folder, csp_scenario, class_scenario, rcsp_scenario)
-        acc_list.append(trn_acc) 
-        count_trn += 1        
-        print('\trun time since start: {:<1.2f} seconds\n'.format(time() - start_time))
-        
+    print('file {}/{} : {}'.format(count_ind + 1,len(df_sessions), df_sessions['ov_file'][count_ind]))
+    
+    trn_acc = run_env.run_environment.run_csp_classifier(file_dict, count_ind + 1, files_folder, csp_class_folder, ov_log,
+                                                         log_folder, csp_scenario, class_scenario, rcsp_scenario, Thik_coeff)
+    acc_list.append(trn_acc) 
+    print('\trun time since start: {:<1.2f} seconds\n'.format(time() - start_time))        
     count_ind += 1
     
 df_accuracy = pd.DataFrame(acc_list)        
-filename = results_folder + 'accuracy_table.csv'
+filename = results_folder + '\\' + 'accuracy_table.csv'
 df_accuracy.to_csv(filename)        
 
 # =============================================================================
 # 2. Produce confusion_matrix by running the replay_online.xml scenario
+# ov_file is a bartraining
+# csp and classifier comes from the trn on the same session
 # =============================================================================
-#df_accuracy    = pd.read_csv(accuracy_table)
-
 trn_to_tes2 = []
-count_ind = 0
 count_trn = 1
+
+print("Now running online simulations")
 for ind in range(len(df_sessions)):
     if inds_bartrn_all[ind]:                
         tmp_dict = {}
@@ -92,18 +92,20 @@ for ind in range(len(df_sessions)):
         tmp_dict['confusion_matrix'] = current_csv
         
         print('file {}/{} : {}'.format(count_trn,sum(inds_bartrn_all), ov_file))
-        trn_simulation = run_env.run_environment.run_online(files_folder, csp_class_folder, csv_folder, tmp_dict, online_scenario)
-        trn_to_tes2.append(trn_simulation)
+        run_env.run_environment.run_online(files_folder, csp_class_folder, csv_folder, tmp_dict, online_scenario, variants)
         
-        confusion_matrix = run_env.run_environment.read_conf_mat(csv_folder, current_csv)
-        print(confusion_matrix)
+        
+        confusion_matrix = run_env.run_environment.read_conf_mat(csv_folder, current_csv, variants)
+        trn_to_tes2.append(confusion_matrix)
+        print('left correct:     ', confusion_matrix['l_correct_0'])
+        print('left false:       ', confusion_matrix['l_false_0'])
+        print('right correct:    ', confusion_matrix['r_correct_0'])
+        print('right false:      ', confusion_matrix['r_false_0'])
+        print('overall accuracy: ', confusion_matrix['accuracy_0'])
         
         count_trn += 1
         print('\trun time since start: {:<1.2f} seconds\n'.format(time() - start_time))
-        
-    count_ind += 1
 
-file_list2 = pd.DataFrame(trn_to_tes2)
-df_accuracy = pd.DataFrame(acc_list)        
-filename = results_folder + 'accuracy_table.csv'
-df_accuracy.to_csv(filename) 
+df_online_accuracy = pd.DataFrame(trn_to_tes2)      
+filename = results_folder + '\\' + 'online_accuracy_table.csv'
+df_online_accuracy.to_csv(filename) 

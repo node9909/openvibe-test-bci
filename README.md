@@ -21,3 +21,8 @@ Some expected knowledge:
 - Python language programming is used to implement the automatization so if you want to implement your own changes in the code, be sure to understand its syntax. The most important packages are [pandas](https://pandas.pydata.org/) and [subprocess](https://docs.python.org/3/library/subprocess.html)
 
 I hope this project can be used as an inspiration to implement fast EEG files processing and reduce manual parameters settings
+
+# TO DO
+- make all important static variables be read form a configFile
+- try to implement it as a .exe ?
+- add matlab files to run statistics analysis on results

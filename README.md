@@ -1,5 +1,5 @@
 # openvibe-test-bci
-An example of framework to run in mass EEG files and BCI training on OpenVibe
+An example of framework to run in mass EEG (Electroencephalography) files and BCI (Brain-Computer Interface) training on OpenVibe
 
 A python code is used to run OpenVibe environments with variable setup parameters. Training information (mainly classifier accuracy) can be extracted from the log produced by OpenVibe Designer.
 

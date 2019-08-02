@@ -23,6 +23,10 @@ Some expected knowledge:
 I hope this project can be used as an inspiration to implement fast EEG files processing and reduce manual parameters settings
 
 # TO DO
-- make all important static variables be read form a configFile
-- try to implement it as a .exe ?
-- add matlab files to run statistics analysis on results
+- (EASY) make all important static variables be read form a configFile
+- (MEDIUM) rewrite main.py in batch mode
+- (NEVER DID IT) try to implement it as a .exe ?
+- (EASY) implement try-except logic for the processing pipeline (+ notify-run error message)
+
+# Last Updates:
+- (02/08/2019) Added notify-run, which can send you notifications through the [notify.run](https://notify.run/) service

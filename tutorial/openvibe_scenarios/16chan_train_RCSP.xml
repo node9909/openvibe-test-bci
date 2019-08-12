@@ -77,14 +77,14 @@
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Shrinkage coefficient</Name>
 					<DefaultValue>0.0</DefaultValue>
-					<Value>0.0</Value>
+					<Value>${shrink_coeff}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 				<Setting>
 					<TypeIdentifier>(0x512a166f, 0x5c3ef83f)</TypeIdentifier>
 					<Name>Tikhonov coefficient</Name>
 					<DefaultValue>0.0</DefaultValue>
-					<Value>${reg_coeff}</Value>
+					<Value>${tikh_coeff}</Value>
 					<Modifiability>false</Modifiability>
 				</Setting>
 			</Settings>

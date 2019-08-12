@@ -8,10 +8,14 @@ tablesAcc = readtable(tableAcc_filename);
 
 tableAccOnline_filename = [folder_results 'online_accuracy_table.csv'];
 tableAccOnline = readtable(tableAccOnline_filename);
+tableAccOnlineFields = tableAccOnline.Properties.VariableNames';
+indC = strfind(tableAccOnlineFields, 'accuracy');
+indAcc = find(not(cellfun('isempty', indC)));
 
-acc_matrix = [];
 xlabels = {'CSP','TRCSP @ 1e^-3', 'TRCSP @ 1e^-2', 'TRCSP @ 1e^-1', 'TRCSP @ 1'};
 acc_matrix = table2array(tablesAcc(:,2:2+size(xlabels,2) - 1));
+acc_online_matrix = table2array(tableAccOnline(:,indAcc));
+acc_matrix = acc_online_matrix*100;
 
 disp([repmat('_',1,80) newline])
 %% Show data collected
@@ -20,6 +24,7 @@ title_str = 'Figure 1: Accuracy per training mode';
 
 imagesc(acc_matrix)
 xticklabels(xlabels)
+xticks([1:length(xlabels)])
 xtickangle(80)
 title(title_str)
 ylabel('Sessions')
@@ -69,6 +74,7 @@ disp([repmat('_',1,80) newline])
 %% Show histogram of accuracies
 h3 = figure;
 title_str = 'Histograms of accuracy';
+edges = 0:5:100;
 
 mean_acc_with_csp   = mean(acc_matrix(:,1));
 median_acc_with_csp = median(acc_matrix(:,1));
@@ -79,12 +85,19 @@ median_acc_with_trcsp = median(acc_matrix_mean_rcsp(:,1));
 std_acc_with_trcsp    = std(acc_matrix_mean_rcsp(:,1));
 
 subplot(2,1,1)
-hist(acc_matrix(:,1))
+histogram(acc_matrix(:,1),edges)
+xlim([30 100])
 title('Calculated using classical CSP')
-subplot(2,1,2)
+ylabel('Sessions')
+xlabel('Accuracy (%)')
 
+subplot(2,1,2)
 hist(acc_matrix_mean_rcsp)
+histogram(acc_matrix_mean_rcsp,edges)
+xlim([30 100])
 title('Calculated using TRCSP')
+ylabel('Sessions')
+xlabel('Accuracy (%)')
 
 [~,h3_suplabel] = suplabel(title_str,'t');
 set(h3_suplabel,'FontSize',30)
